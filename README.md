@@ -112,42 +112,58 @@ MedicineAgent（LangGraph ReAct Agent + Qwen LLM）
 ### 安装依赖
 
 ```bash
-# 创建虚拟环境 medicine
-conda create -n medicine python=3.12.3
-conda activate medicine
+conda create -n lang python=3.12.3
+conda activate lang
 pip install -r requirements.txt
 ```
 
-### 配置
+### 配置（.env 注入）
 
-编辑 `config/config.py`，根据实际环境修改以下关键配置：
+敏感配置（API Key、服务端口等）通过项目根目录的 `.env` 文件注入，`config/config.py` 启动时自动加载（`python-dotenv`），**禁止硬编码到代码**。
 
-```python
-# 原始数据与向量索引存储路径
-BASE_DIR = r"D:\Embeddings_Data\medicine_llamaindex"
+复制以下内容到项目根目录的 `.env` 并填入自己的密钥：
 
-# Embedding 模型本地路径
-EMBEDDING_MODELS_ROOT = "D:/Embeddings_Model"
+```dotenv
+# ─── Qwen（通义千问） ─────────────────────────────────
+QWEN_API_KEY=your-dashscope-api-key
+QWEN_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
+QWEN_MODEL_NAME=qwen3.5-plus
+QWEN_TEMPERATURE=0.2
+QWEN_MAX_TOKENS=10000
+QWEN_TIMEOUT=60
 
-# Qwen API 密钥（建议改为环境变量）
-QWEN_API_KEY = "your-api-key-here"
-QWEN_MODEL_NAME = "qwen3.5-plus"
+# ─── FastAPI 服务 ─────────────────────────────────────
+FASTAPI_HOST=127.0.0.1
+FASTAPI_PORT=8000
+
+# ─── 离线资源路径（可选，缺省走 config.py 中的默认值） ─
+# MEDICINE_BASE_DIR=D:/Embeddings_Data/medicine_llamaindex
+# EMBEDDING_MODELS_ROOT=D:/Embeddings_Model
+# EMBEDDING_DEVICE=cuda
+# EMBEDDING_TARGET_DEVICES=cuda:0,cuda:1
+# RERANKER_ENABLED=false
 ```
+
+`.env` 已在 `.gitignore` 中，不会被提交。其他相对稳定的离线资源路径（向量库 / 模型缓存）默认值在 `config/config.py` 中，按需通过环境变量覆盖。
 
 ### 构建向量索引（首次使用）
 
 ```bash
-conda activate medicine
+conda activate lang
 cd /path/to/project
 python build_index.py
+# 或使用脚本入口（PowerShell）
+pwsh ./scripts/build.ps1
 ```
 
 ### 启动服务
 
 ```bash
-conda activate medicine
+conda activate lang
 cd /path/to/project
 uvicorn app_fastapi:app --host 127.0.0.1 --port 8000 --reload
+# 或使用脚本入口（PowerShell，host/port 走 .env 默认值）
+pwsh ./scripts/run.ps1
 ```
 
 访问 [http://127.0.0.1:8000](http://127.0.0.1:8000) 即可使用。
@@ -157,15 +173,20 @@ uvicorn app_fastapi:app --host 127.0.0.1 --port 8000 --reload
 ## 项目结构
 
 ```
-medic/
+medicine-ai-assistant/
 ├── app_fastapi.py          # FastAPI 服务入口，SSE 流式对话端点
+├── build_index.py          # 向量索引构建入口（process_data → build_indexes）
+├── .env                    # 敏感配置（API Key / 端口），git 忽略
 ├── config/
-│   └── config.py           # 全局配置（路径、模型、API、服务参数）
+│   └── config.py           # 全局配置（自动 load_dotenv，提供默认值）
 ├── modules/
 │   ├── agents.py           # LangChain ReAct Agent、三个 Tool、流式输出
 │   ├── index_manager.py    # llama-index 向量索引构建、加载、检索管理
 │   ├── chroma_store.py     # ChromaDB 适配器（DEFAULT/MMR 查询、MetadataFilters）
 │   └── data_loader.py      # 药品 JSON 数据加载、清洗、三类 Document 构建
+├── scripts/
+│   ├── run.ps1             # 启动 FastAPI（PowerShell）
+│   └── build.ps1           # 构建向量索引（PowerShell）
 ├── static/
 │   ├── index.html          # 前端 SPA 主页
 │   ├── css/style.css       # 界面样式
@@ -281,12 +302,13 @@ data: [DONE]
 | `FASTAPI_HOST` | `127.0.0.1` | 服务监听地址 |
 | `FASTAPI_PORT` | `8000` | 服务监听端口 |
 
-**启用精排（Reranker）：**
+所有配置项均可通过 `.env` 覆盖；空缺时使用 `config/config.py` 中的默认值。
 
-```python
-# config/config.py
-RERANKER_ENABLED = True
-RERANKER_MODEL_NAME = "BAAI/bge-reranker-v2-m3"
+**启用精排（Reranker）：** 在 `.env` 中设置
+
+```dotenv
+RERANKER_ENABLED=true
+RERANKER_MODEL_NAME=BAAI/bge-reranker-v2-m3
 ```
 
 ---
