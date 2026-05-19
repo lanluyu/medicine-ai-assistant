@@ -32,12 +32,10 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config.config import FASTAPI_HOST, FASTAPI_PORT, STATIC_DIR
+from core.logging_config import setup_logging
 from modules.agents import MedicineAgent
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+setup_logging(app_name="medicine-api")
 logger = logging.getLogger(__name__)
 
 # ─── 全局 Agent 单例 ──────────────────────────────────────────────────

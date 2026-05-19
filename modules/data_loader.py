@@ -28,7 +28,7 @@ from bs4 import BeautifulSoup
 from typing import List, Dict, Any, Optional
 from llama_index.core.schema import Document
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# 业务模块不配置日志格式，由入口 core.logging_config.setup_logging() 统一管理
 logger = logging.getLogger(__name__)
 
 

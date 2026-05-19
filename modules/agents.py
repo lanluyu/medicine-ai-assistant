@@ -37,7 +37,7 @@ from config.config import (
     COLLECTION_COMPREHENSIVE,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# 业务模块不配置日志格式，由入口 core.logging_config.setup_logging() 统一管理
 logger = logging.getLogger(__name__)
 
 # ─── 全局单例（延迟初始化）────────────────────────────────────────────

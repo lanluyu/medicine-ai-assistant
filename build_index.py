@@ -28,13 +28,11 @@ from config.config import (
     COLLECTION_INDICATIONS,
     COLLECTION_COMPREHENSIVE,
 )
+from core.logging_config import setup_logging
 from modules.data_loader import MedicineDataLoader
 from modules.index_manager import MedicineIndexManager
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+setup_logging(app_name="build-index")
 logger = logging.getLogger("build_index")
 
 
