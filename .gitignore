@@ -36,6 +36,10 @@ secrets.json
 *.swo
 *~
 
+# ── Claude Code 会话临时文件 ─────────────────────────────
+RESUME.txt
+HANDOFF*.txt
+
 # ── 操作系统 ─────────────────────────────────────────────
 .DS_Store
 Thumbs.db
